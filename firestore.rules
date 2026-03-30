@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Permite a cualquier usuario leer si isPublic = true. 
+// Para settings, permitelo siempre leer.
+// Solo ggonzalovalderrama@gmail.com puede crear/modificar/borrar.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Función auxiliar para determinar si es dueño
+    function isOwner() {
+      return request.auth != null && request.auth.token.email == 'ggonzalovalderrama@gmail.com';
+    }
+
+    // Configuración global de diseño
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isOwner();
+    }
+
+    // Álbumes
+    match /albums/{albumId} {
+      // Público si isPublic es true, o siempre visible para el dueño
+      allow read: if resource.data.isPublic == true || isOwner();
+      allow write: if isOwner();
+    }
+
+    // Fotos (Las fotos dependen de la visibilidad del álbum al que pertenecen, 
+    // pero para buscar más fácilmente en frontend, asumimos que si accedes al path 
+    // del front tienes el ID, igual bloqueamos fotos si el admin no quiere darlas,
+    // o simplemente dejamos lectura total si tienes la URL real y el albumId)
+    match /photos/{photoId} {
+      allow read: if true; // Se podría restringir comprobando el parent_album, pero requeriría un get().
+      allow write: if isOwner();
+    }
+  }
+}

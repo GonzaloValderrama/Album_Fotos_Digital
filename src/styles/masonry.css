@@ -1,0 +1,96 @@
+.my-masonry-grid {
+  display: -webkit-box; /* Not needed if autoprefixed, but good for safety */
+  display: -ms-flexbox;
+  display: flex;
+  margin-left: -20px; /* gutter size offset */
+  width: auto;
+}
+.my-masonry-grid_column {
+  padding-left: 20px; /* gutter size */
+  background-clip: padding-box;
+}
+
+/* Style your items */
+.my-masonry-grid_column > div {
+  margin-bottom: 20px;
+}
+
+.masonry-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background-color: #f3f4f6; /* Placeholder color before img loads */
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.4s ease;
+}
+
+.masonry-item:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: var(--shadow-hover);
+}
+
+.masonry-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  transition: opacity 0.5s ease;
+}
+
+.masonry-img.loading {
+  opacity: 0;
+}
+
+.masonry-img.loaded {
+  opacity: 1;
+}
+
+/* Gradient overlay for text readability on covers */
+.masonry-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 50%;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.masonry-item:hover::after {
+  opacity: 1;
+}
+
+.masonry-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  padding: 1.5rem;
+  color: white;
+  z-index: 20;
+  transform: translateY(10px);
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.masonry-item:hover .masonry-content {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.album-title {
+  font-family: var(--font-family);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: #fff;
+}
+
+.album-meta {
+  font-size: 0.875rem;
+  opacity: 0.8;
+}

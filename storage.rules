@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// Permite a cualquier persona ver las fotos a través de Firebase Storage web URLs,
+// pero solo al dueño subirlas o eliminarlas.
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    function isOwner() {
+      return request.auth != null && request.auth.token.email == 'ggonzalovalderrama@gmail.com';
+    }
+
+    match /photos/{allPaths=**} {
+      // Cualquiera puede leer la ruta del archivo, para que el frontend funcione. 
+      // El listado general y accesibilidad se protege vía Firestore isPublic en álbum.
+      // Aquí, quien tiene el link público (por el PWA visitor), lo ve.
+      allow read: if true; 
+      
+      // Solo el Admin sube
+      allow write, delete: if isOwner();
+    }
+  }
+}
