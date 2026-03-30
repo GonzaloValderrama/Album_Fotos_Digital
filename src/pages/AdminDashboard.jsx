@@ -7,8 +7,8 @@ import { db } from '../firebase/config';
 import { collection, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 const AdminDashboard = () => {
-  const { albums, loading } = useAlbums(false); // fetch all
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
+  const { albums, loading } = useAlbums(false, user?.uid); 
   const [isCreating, setIsCreating] = useState(false);
   const [newAlbum, setNewAlbum] = useState({ name: '', description: '', isPublic: false, coverUrl: '' });
 
@@ -19,6 +19,8 @@ const AdminDashboard = () => {
     try {
       await addDoc(collection(db, 'albums'), {
         ...newAlbum,
+        ownerId: user.uid,
+        ownerName: user.displayName || user.email,
         createdAt: new Date().toISOString()
       });
       setIsCreating(false);

@@ -7,31 +7,32 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Función auxiliar para determinar si es dueño
-    function isOwner() {
+    // Función auxiliar para determinar si es dueño (SuperAdmin)
+    function isSuperAdmin() {
       return request.auth != null && request.auth.token.email == 'ggonzalovalderrama@gmail.com';
     }
 
     // Configuración global de diseño
     match /settings/{docId} {
       allow read: if true;
-      allow write: if isOwner();
+      allow write: if isSuperAdmin();
     }
 
     // Álbumes
     match /albums/{albumId} {
-      // Público si isPublic es true, o siempre visible para el dueño
-      allow read: if resource.data.isPublic == true || isOwner();
-      allow write: if isOwner();
+      // Público si isPublic es true, o visible para el dueño / superadmin
+      allow read: if resource.data.isPublic == true || isSuperAdmin() || (request.auth != null && resource.data.ownerId == request.auth.uid) || (request.auth != null && !("ownerId" in resource.data));
+      // Permitir crear si se asignan como dueños
+      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
+      // Actualizar / borrar si eran dueños
+      allow update, delete: if isSuperAdmin() || (request.auth != null && resource.data.ownerId == request.auth.uid) || (request.auth != null && !("ownerId" in resource.data));
     }
 
-    // Fotos (Las fotos dependen de la visibilidad del álbum al que pertenecen, 
-    // pero para buscar más fácilmente en frontend, asumimos que si accedes al path 
-    // del front tienes el ID, igual bloqueamos fotos si el admin no quiere darlas,
-    // o simplemente dejamos lectura total si tienes la URL real y el albumId)
+    // Fotos (Lectura libre guiada por el frontend, creación protegida, borrado propietario)
     match /photos/{photoId} {
-      allow read: if true; // Se podría restringir comprobando el parent_album, pero requeriría un get().
-      allow write: if isOwner();
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isSuperAdmin() || (request.auth != null && resource.data.ownerId == request.auth.uid) || (request.auth != null && !("ownerId" in resource.data));
     }
   }
 }

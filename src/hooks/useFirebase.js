@@ -2,14 +2,17 @@ import { useState, useEffect } from 'react';
 import { db } from '../firebase/config';
 import { collection, query, where, orderBy, onSnapshot } from 'firebase/firestore';
 
-export const useAlbums = (publicOnly = false) => {
+export const useAlbums = (publicOnly = false, ownerId = null) => {
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let q = query(collection(db, 'albums'), orderBy('createdAt', 'desc'));
+    
     if (publicOnly) {
       q = query(collection(db, 'albums'), where('isPublic', '==', true), orderBy('createdAt', 'desc'));
+    } else if (ownerId) {
+      q = query(collection(db, 'albums'), where('ownerId', '==', ownerId), orderBy('createdAt', 'desc'));
     }
 
     const unsub = onSnapshot(q, (snapshot) => {
@@ -22,7 +25,7 @@ export const useAlbums = (publicOnly = false) => {
     });
 
     return unsub;
-  }, [publicOnly]);
+  }, [publicOnly, ownerId]);
 
   return { albums, loading };
 };

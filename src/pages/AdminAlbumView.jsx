@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { usePhotos, useAlbums } from '../hooks/useFirebase';
+import { useAuth } from '../contexts/AuthContext';
 import { db, storage } from '../firebase/config';
 import { doc, getDoc, collection, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
@@ -10,8 +11,9 @@ const AdminAlbumView = () => {
   const { id: albumId } = useParams();
   const navigate = useNavigate();
   const [album, setAlbum] = useState(null);
+  const { user } = useAuth();
   const { photos, loading: photosLoading } = usePhotos(albumId);
-  const { albums } = useAlbums(false); // needed for replicate
+  const { albums } = useAlbums(false, user?.uid); 
   
   const [uploading, setUploading] = useState(false);
   const [progressFiles, setProgressFiles] = useState({});
@@ -57,6 +59,7 @@ const AdminAlbumView = () => {
             
             await addDoc(collection(db, 'photos'), {
               albumId,
+              ownerId: user.uid,
               url: downloadURL,
               storagePath: uploadTask.snapshot.ref.fullPath,
               createdAt: new Date().toISOString()
@@ -102,6 +105,7 @@ const AdminAlbumView = () => {
     try {
       await addDoc(collection(db, 'photos'), {
         albumId: replicateTo,
+        ownerId: user.uid,
         url: photo.url,
         storagePath: photo.storagePath, // reuse same storage path
         createdAt: new Date().toISOString()

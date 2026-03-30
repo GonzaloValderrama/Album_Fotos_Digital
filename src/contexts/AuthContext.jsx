@@ -9,12 +9,12 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isOwner, setIsOwner] = useState(false);
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      setIsOwner(currentUser?.email === OWNER_EMAIL);
+      setIsSuperAdmin(currentUser?.email === OWNER_EMAIL);
       setLoading(false);
     });
     return unsubscribe;
@@ -22,12 +22,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = async () => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      if (result.user.email !== OWNER_EMAIL) {
-        // If someone else logs in, sign them out immediately
-        await signOut(auth);
-        throw new Error("No tienes permisos de administrador.");
-      }
+      await signInWithPopup(auth, googleProvider);
     } catch (error) {
       console.error(error);
       throw error;
@@ -38,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    isOwner,
+    isSuperAdmin,
     loading,
     loginWithGoogle,
     logout,

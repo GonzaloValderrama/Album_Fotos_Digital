@@ -16,10 +16,10 @@ import './styles/global.css';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }) => {
-  const { user, isOwner, loading } = useAuth();
+  const { user, loading } = useAuth();
   
   if (loading) return <div className="full-center loader"></div>;
-  if (!user || !isOwner) return <Navigate to="/admin/login" replace />;
+  if (!user) return <Navigate to="/admin/login" replace />;
   
   return children;
 };
