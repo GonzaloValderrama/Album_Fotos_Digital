@@ -3,14 +3,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const { loginWithGoogle, user, isOwner } = useAuth();
+  const { loginWithGoogle, user } = useAuth();
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    if (user && isOwner) {
+    if (user) {
       navigate('/admin');
     }
-  }, [user, isOwner, navigate]);
+  }, [user, navigate]);
 
   const handleLogin = async () => {
     try {

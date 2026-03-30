@@ -7,7 +7,7 @@ import { db } from '../firebase/config';
 import { collection, addDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 const AdminDashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, isSuperAdmin, logout } = useAuth();
   const { albums, loading } = useAlbums(false, user?.uid); 
   const [isCreating, setIsCreating] = useState(false);
   const [newAlbum, setNewAlbum] = useState({ name: '', description: '', isPublic: false, coverUrl: '' });
@@ -52,9 +52,11 @@ const AdminDashboard = () => {
       <nav className="glass-nav">
         <h2 style={{ fontSize: '1.25rem' }}>Admin Dashboard</h2>
         <div style={{ display: 'flex', gap: '1rem' }}>
-          <Link to="/admin/settings" className="btn btn-secondary">
-            <Settings size={18} /> Ajustes Generales
-          </Link>
+          {isSuperAdmin && (
+            <Link to="/admin/settings" className="btn btn-secondary">
+              <Settings size={18} /> Ajustes Generales
+            </Link>
+          )}
           <button onClick={logout} className="btn" style={{ background: '#fecaca', color: '#b91c1c' }}>
             <LogOut size={18} />
           </button>
